@@ -133,17 +133,38 @@
         .analysis-row:nth-child(even) {
             background: #f8fafc;
         }
+        
+        .logo-container {
+            transition: all 0.3s ease;
+        }
+        
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen font-sans">
     <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="text-center mb-10 animate-slide-up">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-                📊 Calculadora de Performance
-            </h1>
-            <p class="text-xl text-white/80 mb-2">Análise de Conversão e Resultados</p>
-            <div class="w-32 h-1 bg-gradient-to-r from-blue-400 to-cyan-400 mx-auto rounded-full"></div>
+        <!-- Header with Logos -->
+        <div class="relative mb-10 animate-slide-up">
+            <!-- Logo Superior Esquerda -->
+            <div class="absolute top-0 left-0 z-10 logo-container">
+                <img src="https://imgur.com/a/kp8l9bK" alt="Logo Esquerda" class="h-16 w-auto drop-shadow-lg" onerror="this.src=''; this.alt='Logo não carregada'; this.style.display='none';">
+            </div>
+            
+            <!-- Logo Superior Direita -->
+            <div class="absolute top-0 right-0 z-10 logo-container">
+                <img src="https://imgur.com/CP4K7Wk" alt="Logo Direita" class="h-16 w-auto drop-shadow-lg" onerror="this.src=''; this.alt='Logo não carregada'; this.style.display='none';">
+            </div>
+            
+            <!-- Título Central -->
+            <div class="text-center pt-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    📊 Calculadora de Performance
+                </h1>
+                <p class="text-xl text-white/80 mb-2">Análise de Conversão e Resultados</p>
+                <div class="w-32 h-1 bg-gradient-to-r from-blue-400 to-cyan-400 mx-auto rounded-full"></div>
+            </div>
         </div>
 
         <!-- Calculator Container -->
@@ -279,9 +300,17 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="text-center mt-8 text-white/70">
-            <p>© 2024 Calculadora de Performance - Otimize seus resultados</p>
+        <!-- Footer with Logo -->
+        <div class="relative mt-8">
+            <!-- Logo Inferior Direita -->
+            <div class="absolute bottom-0 right-0 logo-container">
+                <img src="URL_DA_SUA_LOGO_DIREITA" alt="Logo Direita" class="h-12 w-auto opacity-80 drop-shadow-lg" onerror="this.src=''; this.alt='Logo não carregada'; this.style.display='none';">
+            </div>
+            
+            <!-- Texto do Footer -->
+            <div class="text-center text-white/70 pb-4">
+                <p>© 2024 Calculadora de Performance - Otimize seus resultados</p>
+            </div>
         </div>
     </div>
 
@@ -608,5 +637,5 @@
         // Initialize
         updateCalculations();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'986de7c9334af173',t:'MTc1OTE3NDMzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9873444ac402f223',t:'MTc1OTIzMDU1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
