@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Performance - Análise de Conversão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .metric-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-highlight {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-slide-up {
+            animation: slideInUp 0.6s ease-out;
+        }
+        
+        .analysis-tab {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .analysis-tab.active {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .analysis-tab:hover {
+            background: #e2e8f0;
+        }
+        
+        .analysis-tab.active:hover {
+            background: linear-gradient(45deg, #2563eb, #1e40af);
+        }
+        
+        .analysis-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .analysis-row:last-child {
+            border-bottom: none;
+        }
+        
+        .analysis-row:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        .logo-container {
+            transition: all 0.3s ease;
+        }
+        
+        .logo-container:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with Logos -->
+        <div class="relative mb-10 animate-slide-up">
+            <!-- Logo Superior Esquerda -->
+            <div class="absolute top-0 left-0 z-10 logo-container">
+                <img src="https://www.bellinatiperez.com.br/assets/images/Nova-Logo-Bp.svg" alt="Logo Esquerda" class="h-16 w-auto drop-shadow-lg" onerror="this.src=''; this.alt='Logo não carregada'; this.style.display='none';">
+            </div>
+            
+            <!-- Logo Superior Direita -->
+            <div class="absolute top-0 right-0 z-10 logo-container">
+                <img src="https://i.imgur.com/CP4K7Wk.png" alt="Logo Direita" class="h-16 w-auto drop-shadow-lg" onerror="this.src=''; this.alt='Logo não carregada'; this.style.display='none';">
+            </div>
+            
+            <!-- Título Central -->
+            <div class="text-center pt-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                    📊 Calculadora de Performance
+                </h1>
+                <p class="text-xl text-white/80 mb-2">Análise de Conversão e Resultados</p>
+                <div class="w-32 h-1 bg-gradient-to-r from-blue-400 to-cyan-400 mx-auto rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Calculator Container -->
+        <div class="max-w-6xl mx-auto glass-effect rounded-3xl p-8 shadow-2xl animate-slide-up">
+            
+            <!-- Detailed Analysis - Moved to top -->
+            <div class="bg-white rounded-2xl p-8 shadow-lg mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📊 Análise Detalhada</h2>
+                
+                <!-- Analysis Tabs -->
+                <div class="flex flex-wrap justify-center gap-2 mb-6">
+                    <button onclick="showAnalysis('meta-direto')" id="tab-meta-direto" class="analysis-tab active px-4 py-2 rounded-lg font-semibold transition-all">Meta Direto</button>
+                    <button onclick="showAnalysis('funil')" id="tab-funil" class="analysis-tab px-4 py-2 rounded-lg font-semibold transition-all">Funil</button>
+                    <button onclick="showAnalysis('funil-du')" id="tab-funil-du" class="analysis-tab px-4 py-2 rounded-lg font-semibold transition-all">Funil / D.U</button>
+                    <button onclick="showAnalysis('funil-agente')" id="tab-funil-agente" class="analysis-tab px-4 py-2 rounded-lg font-semibold transition-all">Funil / Agente</button>
+                    <button onclick="showAnalysis('funil-du-agente')" id="tab-funil-du-agente" class="analysis-tab px-4 py-2 rounded-lg font-semibold transition-all">Funil / D.U / Agente</button>
+                </div>
+
+                <!-- Analysis Content -->
+                <div id="analysis-content">
+                    <!-- Content will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Input Variables Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                <!-- Meta Cliente -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">🎯</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Meta Cliente</h3>
+                    </div>
+                    <input type="number" id="meta-cliente" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="50000" min="1">
+                    <p class="text-sm text-gray-500 mt-2 text-center">R$ por mês</p>
+                </div>
+
+                <!-- % Direto -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">📞</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">% Direto</h3>
+                    </div>
+                    <input type="number" id="direto-input" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="30" min="0" max="100">
+                    <p class="text-sm text-gray-500 mt-2 text-center">Percentual</p>
+                </div>
+
+                <!-- Ticket Médio -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">💰</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Ticket Médio</h3>
+                    </div>
+                    <input type="number" id="ticket-medio" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="500" min="1">
+                    <p class="text-sm text-gray-500 mt-2 text-center">R$ por cliente</p>
+                </div>
+
+                <!-- % Efetividade -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">⚡</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">% Efetividade</h3>
+                    </div>
+                    <input type="number" id="efetividade-input" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="25" min="0" max="100">
+                    <p class="text-sm text-gray-500 mt-2 text-center">Percentual</p>
+                </div>
+
+                <!-- % Conversão -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">🔄</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">% Conversão</h3>
+                    </div>
+                    <input type="number" id="conversao-input" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="15" min="0" max="100">
+                    <p class="text-sm text-gray-500 mt-2 text-center">Percentual</p>
+                </div>
+
+                <!-- % CPC/Alô -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">📱</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">% CPC/Alô</h3>
+                    </div>
+                    <input type="number" id="cpc-alo-input" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="40" min="0" max="100">
+                    <p class="text-sm text-gray-500 mt-2 text-center">Percentual</p>
+                </div>
+
+                <!-- Agentes -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">👥</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Agentes</h3>
+                    </div>
+                    <input type="number" id="agentes" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="5" min="1">
+                    <p class="text-sm text-gray-500 mt-2 text-center">Quantidade</p>
+                </div>
+
+                <!-- Dias Úteis -->
+                <div class="metric-card bg-white rounded-2xl p-6 shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-white text-lg">📅</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Dias Úteis</h3>
+                    </div>
+                    <input type="number" id="dias-uteis" class="input-field w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent text-center text-lg font-semibold" value="22" min="1" max="31">
+                    <p class="text-sm text-gray-500 mt-2 text-center">Por mês</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="resetCalculator()" class="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 backdrop-blur-sm">
+                    🔄 Resetar Valores
+                </button>
+                <button onclick="exportResults()" class="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-xl font-semibold transition-all duration-300">
+                    📤 Exportar Análise
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer with Logo -->
+        <div class="relative mt-8">
+            <!-- Logo Inferior Direita -->
+            <div class="absolute bottom-0 right-0 logo-container">
+                <img src="https://i.imgur.com/CP4K7Wk.png" alt="Logo Direita" class="h-12 w-auto opacity-80 drop-shadow-lg" onerror="this.src=''; this.alt='Logo não carregada'; this.style.display='none';">
+            </div>
+            
+            <!-- Texto do Footer -->
+            <div class="text-center text-white/70 pb-4">
+                <p>© 2024 Calculadora de Performance - Otimize seus resultados</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAnalysis = 'meta-direto';
+        
+        function getInputValues() {
+            return {
+                metaCliente: parseFloat(document.getElementById('meta-cliente').value) || 0,
+                percentualDireto: parseFloat(document.getElementById('direto-input').value) || 0,
+                ticketMedio: parseFloat(document.getElementById('ticket-medio').value) || 0,
+                percentualEfetividade: parseFloat(document.getElementById('efetividade-input').value) || 0,
+                percentualConversao: parseFloat(document.getElementById('conversao-input').value) || 0,
+                percentualCpcAlo: parseFloat(document.getElementById('cpc-alo-input').value) || 0,
+                agentes: parseFloat(document.getElementById('agentes').value) || 1,
+                diasUteis: parseFloat(document.getElementById('dias-uteis').value) || 1
+            };
+        }
+        
+        function calculateMetrics() {
+            const inputs = getInputValues();
+            
+            // Calculadora Meta Direto
+            const direto = inputs.metaCliente * (inputs.percentualDireto / 100);
+            const pagamentos = direto / inputs.ticketMedio;
+            const boletosGerados = pagamentos * (100 / inputs.percentualEfetividade);
+            const cpc = boletosGerados * (100 / inputs.percentualConversao);
+            const alo = cpc * (100 / inputs.percentualCpcAlo);
+            
+            // Funil
+            const funil = {
+                alo: alo,
+                cpc: cpc,
+                boleto: boletosGerados,
+                pgto: pagamentos,
+                percCpcAlo: (cpc / alo) * 100,
+                percConversao: (boletosGerados / cpc) * 100,
+                percEfetividade: (pagamentos / boletosGerados) * 100,
+                ticketMedio: inputs.ticketMedio,
+                geracao: boletosGerados * inputs.ticketMedio,
+                recebimento: pagamentos * inputs.ticketMedio
+            };
+            
+            // Funil / D.U
+            const funilDU = {
+                alo: alo / inputs.diasUteis,
+                cpc: cpc / inputs.diasUteis,
+                boleto: boletosGerados / inputs.diasUteis,
+                pgto: pagamentos / inputs.diasUteis,
+                percCpcAlo: ((cpc / inputs.diasUteis) / (alo / inputs.diasUteis)) * 100,
+                percConversao: ((boletosGerados / inputs.diasUteis) / (cpc / inputs.diasUteis)) * 100,
+                percEfetividade: ((pagamentos / inputs.diasUteis) / (boletosGerados / inputs.diasUteis)) * 100,
+                ticketMedio: inputs.ticketMedio,
+                geracao: (boletosGerados / inputs.diasUteis) * inputs.ticketMedio,
+                recebimento: (pagamentos / inputs.diasUteis) * inputs.ticketMedio
+            };
+            
+            // Funil / Agente
+            const funilAgente = {
+                alo: alo / inputs.agentes,
+                cpc: cpc / inputs.agentes,
+                boleto: boletosGerados / inputs.agentes,
+                pgto: pagamentos / inputs.agentes,
+                percCpcAlo: ((cpc / inputs.agentes) / (alo / inputs.agentes)) * 100,
+                percConversao: ((boletosGerados / inputs.agentes) / (cpc / inputs.agentes)) * 100,
+                percEfetividade: ((pagamentos / inputs.agentes) / (boletosGerados / inputs.agentes)) * 100,
+                ticketMedio: inputs.ticketMedio,
+                geracao: (boletosGerados / inputs.agentes) * inputs.ticketMedio,
+                recebimento: (pagamentos / inputs.agentes) * inputs.ticketMedio
+            };
+            
+            // Funil / D.U / Agente
+            const funilDUAgente = {
+                alo: funilDU.alo / inputs.agentes,
+                cpc: funilDU.cpc / inputs.agentes,
+                boleto: funilDU.boleto / inputs.agentes,
+                pgto: funilDU.pgto / inputs.agentes,
+                percCpcAlo: ((funilDU.cpc / inputs.agentes) / (funilDU.alo / inputs.agentes)) * 100,
+                percConversao: ((funilDU.boleto / inputs.agentes) / (funilDU.cpc / inputs.agentes)) * 100,
+                percEfetividade: ((funilDU.pgto / inputs.agentes) / (funilDU.boleto / inputs.agentes)) * 100,
+                ticketMedio: inputs.ticketMedio,
+                geracao: (funilDU.boleto / inputs.agentes) * inputs.ticketMedio,
+                recebimento: (funilDU.pgto / inputs.agentes) * inputs.ticketMedio
+            };
+            
+            return {
+                metaDireto: {
+                    metaCliente: inputs.metaCliente,
+                    direto: direto,
+                    ticketMedio: inputs.ticketMedio,
+                    pagamentos: pagamentos,
+                    percEfetividade: inputs.percentualEfetividade,
+                    boletosGerados: boletosGerados,
+                    percConversao: inputs.percentualConversao,
+                    cpc: cpc,
+                    percCpcAlo: inputs.percentualCpcAlo,
+                    alo: alo
+                },
+                funil: funil,
+                funilDU: funilDU,
+                funilAgente: funilAgente,
+                funilDUAgente: funilDUAgente
+            };
+        }
+        
+        function formatNumber(num, roundUp = false, useThousandSeparator = false, extraDecimal = false) {
+            if (isNaN(num) || !isFinite(num)) return '0';
+            let result;
+            if (roundUp) {
+                result = Math.ceil(num);
+            } else if (extraDecimal) {
+                result = Math.round(num * 10) / 10;
+            } else {
+                result = Math.round(num * 100) / 100;
+            }
+            
+            if (useThousandSeparator) {
+                return result.toLocaleString('pt-BR', {
+                    minimumFractionDigits: extraDecimal ? 1 : 0,
+                    maximumFractionDigits: extraDecimal ? 1 : 0
+                });
+            }
+            return result;
+        }
+        
+        function formatCurrency(num) {
+            if (isNaN(num) || !isFinite(num)) return 'R$ 0';
+            return `R$ ${formatNumber(num).toLocaleString('pt-BR')}`;
+        }
+        
+        function formatPercent(num) {
+            if (isNaN(num) || !isFinite(num)) return '0%';
+            return `${formatNumber(num)}%`;
+        }
+        
+        function createAnalysisRow(label, value, isPercent = false, isCurrency = false, roundUp = false, useThousandSeparator = false, extraDecimal = false) {
+            let formattedValue = value;
+            if (isPercent) {
+                formattedValue = formatPercent(value);
+            } else if (isCurrency) {
+                formattedValue = formatCurrency(value);
+            } else {
+                formattedValue = formatNumber(value, roundUp, useThousandSeparator, extraDecimal);
+            }
+            
+            return `
+                <div class="analysis-row">
+                    <span class="font-medium text-gray-700">${label}</span>
+                    <span class="font-bold text-blue-600">${formattedValue}</span>
+                </div>
+            `;
+        }
+        
+        function showAnalysis(type) {
+            currentAnalysis = type;
+            
+            // Update tab styles
+            document.querySelectorAll('.analysis-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`tab-${type}`).classList.add('active');
+            
+            const metrics = calculateMetrics();
+            let content = '';
+            
+            switch(type) {
+                case 'meta-direto':
+                    const md = metrics.metaDireto;
+                    content = `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            ${createAnalysisRow('Meta Cliente', md.metaCliente, false, true)}
+                            ${createAnalysisRow('Direto', md.direto, false, true)}
+                            ${createAnalysisRow('Ticket Médio', md.ticketMedio, false, true)}
+                            ${createAnalysisRow('Pagamentos', md.pagamentos, false, false, true)}
+                            ${createAnalysisRow('% Efetividade', md.percEfetividade, true)}
+                            ${createAnalysisRow('Boletos Gerados', md.boletosGerados, false, false, true, true)}
+                            ${createAnalysisRow('% Conversão', md.percConversao, true)}
+                            ${createAnalysisRow('CPC', md.cpc, false, false, true, true)}
+                            ${createAnalysisRow('% CPC/Alô', md.percCpcAlo, true)}
+                            ${createAnalysisRow('Alô', md.alo, false, false, true, true)}
+                        </div>
+                    `;
+                    break;
+                    
+                case 'funil':
+                    const f = metrics.funil;
+                    content = `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            ${createAnalysisRow('Alô', f.alo, false, false, true, true)}
+                            ${createAnalysisRow('CPC', f.cpc, false, false, true, true)}
+                            ${createAnalysisRow('Boleto', f.boleto, false, false, true, true)}
+                            ${createAnalysisRow('Pgto', f.pgto, false, false, true)}
+                            ${createAnalysisRow('% CPC/Alô', f.percCpcAlo, true)}
+                            ${createAnalysisRow('% Conversão', f.percConversao, true)}
+                            ${createAnalysisRow('% Efetividade', f.percEfetividade, true)}
+                            ${createAnalysisRow('Ticket Médio', f.ticketMedio, false, true)}
+                            ${createAnalysisRow('Geração', f.geracao, false, true)}
+                            ${createAnalysisRow('Recebimento', f.recebimento, false, true)}
+                        </div>
+                    `;
+                    break;
+                    
+                case 'funil-du':
+                    const fdu = metrics.funilDU;
+                    content = `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            ${createAnalysisRow('Alô', fdu.alo, false, false, true, true)}
+                            ${createAnalysisRow('CPC', fdu.cpc, false, false, true, true)}
+                            ${createAnalysisRow('Boleto', fdu.boleto, false, false, true, true)}
+                            ${createAnalysisRow('Pgto', fdu.pgto, false, false, true)}
+                            ${createAnalysisRow('% CPC/Alô', fdu.percCpcAlo, true)}
+                            ${createAnalysisRow('% Conversão', fdu.percConversao, true)}
+                            ${createAnalysisRow('% Efetividade', fdu.percEfetividade, true)}
+                            ${createAnalysisRow('Ticket Médio', fdu.ticketMedio, false, true)}
+                            ${createAnalysisRow('Geração', fdu.geracao, false, true)}
+                            ${createAnalysisRow('Recebimento', fdu.recebimento, false, true)}
+                        </div>
+                    `;
+                    break;
+                    
+                case 'funil-agente':
+                    const fa = metrics.funilAgente;
+                    content = `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            ${createAnalysisRow('Alô', fa.alo, false, false, true, true)}
+                            ${createAnalysisRow('CPC', fa.cpc, false, false, true, true)}
+                            ${createAnalysisRow('Boleto', fa.boleto, false, false, true, true)}
+                            ${createAnalysisRow('Pgto', fa.pgto, false, false, true)}
+                            ${createAnalysisRow('% CPC/Alô', fa.percCpcAlo, true)}
+                            ${createAnalysisRow('% Conversão', fa.percConversao, true)}
+                            ${createAnalysisRow('% Efetividade', fa.percEfetividade, true)}
+                            ${createAnalysisRow('Ticket Médio', fa.ticketMedio, false, true)}
+                            ${createAnalysisRow('Geração', fa.geracao, false, true)}
+                            ${createAnalysisRow('Recebimento', fa.recebimento, false, true)}
+                        </div>
+                    `;
+                    break;
+                    
+                case 'funil-du-agente':
+                    const fda = metrics.funilDUAgente;
+                    content = `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            ${createAnalysisRow('Alô', fda.alo, false, false, false, true, true)}
+                            ${createAnalysisRow('CPC', fda.cpc, false, false, false, true, true)}
+                            ${createAnalysisRow('Boleto', fda.boleto, false, false, false, true, true)}
+                            ${createAnalysisRow('Pgto', fda.pgto, false, false, false, false, true)}
+                            ${createAnalysisRow('% CPC/Alô', fda.percCpcAlo, true)}
+                            ${createAnalysisRow('% Conversão', fda.percConversao, true)}
+                            ${createAnalysisRow('% Efetividade', fda.percEfetividade, true)}
+                            ${createAnalysisRow('Ticket Médio', fda.ticketMedio, false, true)}
+                            ${createAnalysisRow('Geração', fda.geracao, false, true)}
+                            ${createAnalysisRow('Recebimento', fda.recebimento, false, true)}
+                        </div>
+                    `;
+                    break;
+            }
+            
+            document.getElementById('analysis-content').innerHTML = content;
+        }
+        
+        function updateCalculations() {
+            showAnalysis(currentAnalysis);
+        }
+        
+        function resetCalculator() {
+            document.getElementById('meta-cliente').value = 50000;
+            document.getElementById('direto-input').value = 30;
+            document.getElementById('ticket-medio').value = 500;
+            document.getElementById('efetividade-input').value = 25;
+            document.getElementById('conversao-input').value = 15;
+            document.getElementById('cpc-alo-input').value = 40;
+            document.getElementById('agentes').value = 5;
+            document.getElementById('dias-uteis').value = 22;
+            updateCalculations();
+        }
+        
+        function exportResults() {
+            const metrics = calculateMetrics();
+            const inputs = getInputValues();
+            
+            let analysis = `📊 CALCULADORA DE PERFORMANCE\n\n`;
+            analysis += `🎯 PARÂMETROS:\n`;
+            analysis += `• Meta Cliente: R$ ${inputs.metaCliente}\n`;
+            analysis += `• % Direto: ${inputs.percentualDireto}%\n`;
+            analysis += `• Ticket Médio: R$ ${inputs.ticketMedio}\n`;
+            analysis += `• % Efetividade: ${inputs.percentualEfetividade}%\n`;
+            analysis += `• % Conversão: ${inputs.percentualConversao}%\n`;
+            analysis += `• % CPC/Alô: ${inputs.percentualCpcAlo}%\n`;
+            analysis += `• Agentes: ${inputs.agentes}\n`;
+            analysis += `• Dias Úteis: ${inputs.diasUteis}\n\n`;
+            
+            analysis += `📈 RESULTADOS FUNIL:\n`;
+            analysis += `• Alô: ${formatNumber(metrics.funil.alo, true, true)}\n`;
+            analysis += `• CPC: ${formatNumber(metrics.funil.cpc, true, true)}\n`;
+            analysis += `• Boletos: ${formatNumber(metrics.funil.boleto, true, true)}\n`;
+            analysis += `• Pagamentos: ${formatNumber(metrics.funil.pgto, true)}\n`;
+            analysis += `• Geração: ${formatCurrency(metrics.funil.geracao)}\n`;
+            analysis += `• Recebimento: ${formatCurrency(metrics.funil.recebimento)}\n\n`;
+            
+            analysis += `📱 Gerado pela Calculadora de Performance`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Análise de Performance',
+                    text: analysis
+                });
+            } else {
+                navigator.clipboard.writeText(analysis).then(() => {
+                    alert('Análise copiada para a área de transferência!');
+                });
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('meta-cliente').addEventListener('input', updateCalculations);
+        document.getElementById('direto-input').addEventListener('input', updateCalculations);
+        document.getElementById('ticket-medio').addEventListener('input', updateCalculations);
+        document.getElementById('efetividade-input').addEventListener('input', updateCalculations);
+        document.getElementById('conversao-input').addEventListener('input', updateCalculations);
+        document.getElementById('cpc-alo-input').addEventListener('input', updateCalculations);
+        document.getElementById('agentes').addEventListener('input', updateCalculations);
+        document.getElementById('dias-uteis').addEventListener('input', updateCalculations);
+        
+        // Initialize
+        updateCalculations();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98739ddfa7adf171',t:'MTc1OTIzNDIyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
